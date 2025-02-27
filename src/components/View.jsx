@@ -63,7 +63,9 @@ const View = (props) => {
           {view.map((view) => (
             <tr key={view._id}>
               <td>{view.category}</td>
-              <td>{view.amount}</td>
+              <td>{`Gs. ${view.amount.toLocaleString("es-PY", {
+                minimumFractionDigits: 0,
+              })}`}</td>
               <td style={{ justifyContent: "center", display: "flex" }}>
                 <CloseButton onClick={() => handleDelete(view)} />
               </td>
@@ -72,9 +74,9 @@ const View = (props) => {
           <tr>
             <td>Total:</td>
             <td>
-              {view.reduce((acumulador, view) => {
-                return acumulador + view.amount; // Sumar el monto actual al acumulador
-              }, 0)}
+              {`Gs. ${view
+                .reduce((acumulador, view) => acumulador + view.amount, 0)
+                .toLocaleString("es-PY", { minimumFractionDigits: 0 })}`}
             </td>
             <td>
               <ModalForm

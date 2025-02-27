@@ -1,13 +1,23 @@
 import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useEffect } from "react";
 import userService from "../services/userService";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import Card from "react-bootstrap/Card";
+import Alert from "react-bootstrap/Alert";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      navigate("/view");
+    }
+  }, [navigate]);
   const {
     register,
     handleSubmit,
@@ -15,11 +25,18 @@ const LoginForm = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    const user = await userService.loginUser(data);
-    if (user) {
-      console.log("logeado");
-      localStorage.setItem("user", JSON.stringify(user.data));
-      navigate("/view");
+    try {
+      const user = await userService.loginUser(data);
+      if (user) {
+        console.log("logeado");
+        localStorage.setItem("user", JSON.stringify(user.data));
+        navigate("/view");
+      }
+    } catch (error) {
+      console.error("Error en login:", error);
+      setErrorMessage(
+        error.response?.data?.message || "Error al iniciar sesión"
+      );
     }
   };
 
@@ -27,6 +44,15 @@ const LoginForm = () => {
     <Container className="d-flex align-items-center justify-content-center vh-100">
       <Card style={{ width: "100%", maxWidth: "400px" }} className="p-4">
         <Card.Title className="text-center">Iniciar sesión</Card.Title>
+        {errorMessage && (
+          <Alert
+            variant="danger"
+            onClose={() => setErrorMessage("")}
+            dismissible
+          >
+            {errorMessage}
+          </Alert>
+        )}
         <Form onSubmit={handleSubmit(onSubmit)}>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Email</Form.Label>

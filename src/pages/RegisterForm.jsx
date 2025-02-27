@@ -5,6 +5,8 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import Alert from "react-bootstrap/Alert";
 
 const RegisterForm = () => {
   const {
@@ -12,6 +14,7 @@ const RegisterForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const onSubmit = async (data) => {
     try {
@@ -19,6 +22,9 @@ const RegisterForm = () => {
       navigate("/login");
     } catch (error) {
       console.log(error);
+      setErrorMessage(
+        error.response?.data?.message || "Error al iniciar sesión"
+      );
     }
   };
 
@@ -26,6 +32,15 @@ const RegisterForm = () => {
     <Container className="d-flex align-items-center justify-content-center">
       <Card style={{ width: "100%", maxWidth: "400px" }} className="p-4">
         <Card.Title className="text-center">Registro</Card.Title>
+        {errorMessage && (
+          <Alert
+            variant="danger"
+            onClose={() => setErrorMessage("")}
+            dismissible
+          >
+            {errorMessage}
+          </Alert>
+        )}
         <Form onSubmit={handleSubmit(onSubmit)}>
           <Form.Group className="mb-3">
             <Form.Label>Nombre de Usuario</Form.Label>

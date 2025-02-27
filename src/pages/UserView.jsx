@@ -56,9 +56,6 @@ const UserView = () => {
             />
           </LocalizationProvider>
         </Col>
-        <Col>
-          <MiDoughnutChart fecha={fecha} service={expenseService} />
-        </Col>
       </Row>
       <Container>
         <Row style={{ justifyContent: "space-between", display: "flex" }}>
@@ -77,6 +74,11 @@ const UserView = () => {
               options={optionsGastos}
               fecha={fecha}
             />
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <MiDoughnutChart fecha={fecha} service={expenseService} />
           </Col>
         </Row>
       </Container>

@@ -6,13 +6,15 @@ const registerUser =async(user)=>{
         return await axios.post(`/register`,user)
     } catch (error) {
         console.log(error);
+        throw error; 
     }
 }
 const loginUser =async(user)=>{
     try {
         return await axios.post(`/login`,user)
     } catch (error) {
-        console.log(error);
+        console.error("Error en loginUser:", error);
+        throw error; 
     }
 }
 
