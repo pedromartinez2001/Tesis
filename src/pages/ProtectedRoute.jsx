@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const ProtectedRoute = () => {
-  const isAuthenticated = JSON.parse(localStorage.getItem("isAuthenticated"));
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  const token = Cookies.get("token");
+  if (!token) return <Navigate to="/login" replace />;
 
   return <Outlet />;
 };

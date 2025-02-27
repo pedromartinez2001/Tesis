@@ -1,24 +1,34 @@
 import { useEffect, useState } from "react";
 import ModalForm from "../components/ModalForm";
-import { Button } from "react-bootstrap";
-
+import { CloseButton, Table } from "react-bootstrap";
+import dayjs from "dayjs";
 const View = (props) => {
   const [view, setView] = useState([]);
   useEffect(() => {
-    props.service
-      .getAll()
-      .then((result) => {
-        setView(result);
-      })
-      .catch((err) => {
+    const fetchData = async () => {
+      try {
+        const result = await props.service.getAll();
+        const filteredViews = result.filter((item) =>
+          dayjs(item.date).isSame(props.fecha, "month")
+        );
+        setView(filteredViews);
+      } catch (err) {
         console.log(err);
-      });
-  }, []);
+      }
+    };
+
+    fetchData();
+  }, [props.fecha]);
 
   const handleCreate = (data) => {
     props.service
       .create(data)
-      .then((response) => setView(view.concat(response)))
+      .then((response) => {
+        const updatedViews = [...view, response]; // Nueva línea
+        setView(updatedViews); // Actualizado
+        const event = new Event("update");
+        window.dispatchEvent(event);
+      })
       .catch((error) => console.log(error));
   };
   const handleDelete = (data) => {
@@ -28,9 +38,12 @@ const View = (props) => {
     if (confirmacion) {
       props.service
         .deleteData(data._id)
-        .then((response) =>
-          setView(view.filter((view) => view._id !== response._id))
-        )
+        .then((response) => {
+          const updatedViews = view.filter((view) => view._id !== response._id); // Actualizado
+          setView(updatedViews); // Actualizado
+          const event = new Event("update");
+          window.dispatchEvent(event);
+        })
         .catch((error) => console.log(error));
     }
   };
@@ -38,21 +51,42 @@ const View = (props) => {
   return (
     <div>
       <h1>{props.title}</h1>
-      <ul>
-        {view.map((view) => (
-          <li key={view._id}>
-            {view.category}
-            <Button variant="danger" onClick={() => handleDelete(view)}>
-              Eliminar
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <ModalForm
-        options={props.options}
-        onSubmit={handleCreate}
-        title={"Crear"}
-      />
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {view.map((view) => (
+            <tr key={view._id}>
+              <td>{view.category}</td>
+              <td>{view.amount}</td>
+              <td style={{ justifyContent: "center", display: "flex" }}>
+                <CloseButton onClick={() => handleDelete(view)} />
+              </td>
+            </tr>
+          ))}
+          <tr>
+            <td>Total:</td>
+            <td>
+              {view.reduce((acumulador, view) => {
+                return acumulador + view.amount; // Sumar el monto actual al acumulador
+              }, 0)}
+            </td>
+            <td>
+              <ModalForm
+                options={props.options}
+                onSubmit={handleCreate}
+                title={"Crear"}
+                fecha={props.fecha}
+              />
+            </td>
+          </tr>
+        </tbody>
+      </Table>
     </div>
   );
 };

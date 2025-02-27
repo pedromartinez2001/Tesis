@@ -1,59 +1,91 @@
 import { useEffect, useState } from "react";
-import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import Cookies from "js-cookie";
 
 const Navigation = () => {
-  const [newUser, setNewUser] = useState(null);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [newUser, setNewUser] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
+
+  const token = Cookies.get("token");
   const navigate = useNavigate();
-  useEffect(() => {
-    setNewUser(user);
-  }, [navigate]);
-  const closeSesion = () => {
-    localStorage.clear();
-    navigate("/");
+
+  // Función para decodificar el token y verificar si está expirado
+  const isTokenValid = (token) => {
+    if (!token) return false;
+    try {
+      // Extraer y decodificar la parte del payload del JWT
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      // Verificar si el token ha expirado (exp está en segundos, Date.now() en ms)
+      return payload.exp * 1000 > Date.now();
+    } catch (error) {
+      console.log(error);
+      return false; // Si hay un error, el token no es válido
+    }
   };
 
+  // Función para cerrar sesión
+  const closeSesion = () => {
+    localStorage.clear();
+    Cookies.remove("token");
+    setNewUser(null);
+    navigate("/login");
+  };
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    setNewUser(user);
+
+    // Validar el token al cargar el componente
+    if (!token || !isTokenValid(token)) {
+      closeSesion();
+    }
+  }, [navigate, token]);
+
   return (
-    <>
-      <Navbar bg="dark" data-bs-theme="dark">
-        <Container>
-          <Navbar.Brand href="#home">Gestion de finanzas</Navbar.Brand>
-          <Nav className="me-auto">
-            {!newUser && (
-              <Container>
-                <Row>
-                  <Col>
-                    <Nav.Link href="/">Inicio</Nav.Link>
-                  </Col>
-                  <Col>
-                    <Nav.Link href="/login">Iniciar sesión</Nav.Link>
-                  </Col>
-                  <Col>
-                    <Nav.Link href="/register">Registrarse</Nav.Link>
-                  </Col>
-                </Row>
-              </Container>
-            )}
-            {newUser && (
-              <Container>
-                <Navbar.Text>
-                  Inicio de sesión de: {newUser.username}
-                </Navbar.Text>
-                <Button variant="danger" onClick={() => closeSesion()}>
-                  Cerrar sesión
-                </Button>
-              </Container>
-            )}
-          </Nav>
-        </Container>
-      </Navbar>
-    </>
+    <Navbar
+      bg="dark"
+      data-bs-theme="dark"
+      collapseOnSelect
+      expand="md"
+      className="p-3 ps-sm-4 ps-2"
+    >
+      <Navbar.Brand style={{ paddingLeft: "1rem" }} href="/home">
+        Gestion de finanzas
+      </Navbar.Brand>
+      <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+      <Navbar.Collapse id="responsive-navbar-nav">
+        <Nav
+          className="me-auto"
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <Nav.Link href="/">Inicio</Nav.Link>
+          {!token && !newUser ? (
+            <>
+              <Nav.Link href="/login">Iniciar sesión</Nav.Link>
+              <Nav.Link href="/register">Registrarse</Nav.Link>
+            </>
+          ) : (
+            <>
+              <Nav.Link href="/view">Ingresos y gastos</Nav.Link>
+              <Nav.Link href="/">¿Puedo sacar un crédito?</Nav.Link>
+              <Nav.Link href="/">Consejos</Nav.Link>
+              <Navbar.Text>Bienvenido: {newUser?.username} </Navbar.Text>
+              <Button variant="danger" onClick={closeSesion}>
+                Cerrar sesión
+              </Button>
+            </>
+          )}
+        </Nav>
+      </Navbar.Collapse>
+    </Navbar>
   );
 };
 

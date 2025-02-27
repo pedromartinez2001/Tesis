@@ -1,15 +1,17 @@
 import { Button, Modal, Form } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import dayjs from "dayjs";
 
-const ModalForm = ({ options, onSubmit, title }) => {
+const ModalForm = ({ options, onSubmit, title, fecha }) => {
   const [show, setShow] = useState(false);
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
-      date: new Date().toISOString().split("T")[0], // Fecha de hoy por defecto
+      date: dayjs().format("YYYY-MM-DD"), // Fecha de hoy por defecto
     },
   });
-
+  const minDate = dayjs(fecha).startOf("month").format("YYYY-MM-DD"); // Primer día del mes
+  const maxDate = dayjs(fecha).endOf("month").format("YYYY-MM-DD"); // Último día del mes
   const handleClose = () => {
     setShow(false), reset();
   };
@@ -57,22 +59,21 @@ const ModalForm = ({ options, onSubmit, title }) => {
               />
             </Form.Group>
 
-            <Form.Group controlId="formDescription">
-              <Form.Label>Descripción</Form.Label>
+            <Form.Group controlId="formDate">
+              <Form.Label>Fecha</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="Ingrese descripción"
-                defaultValue={" "}
-                {...register("description", { required: true })}
+                type="date"
+                min={minDate} // Fecha mínima
+                max={maxDate}
+                {...register("date")}
               />
             </Form.Group>
 
-            <Form.Group controlId="formDate">
-              <Form.Label>Fecha</Form.Label>
-              <Form.Control type="date" {...register("date")} />
-            </Form.Group>
-
-            <Button variant="primary" type="submit">
+            <Button
+              style={{ marginTop: "1rem" }}
+              variant="primary"
+              type="submit"
+            >
               Enviar
             </Button>
           </Form>

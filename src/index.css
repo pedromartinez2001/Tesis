@@ -1,0 +1,14 @@
+
+html, body {
+
+  color: #14df69
+}
+
+.image-container {
+  opacity: 0; /* Inicialmente invisible para la animación */
+  transition: opacity 0.5s ease; /* Efecto suave */
+}
+
+[data-aos] {
+  opacity: 1; /* Al ser visibles, deben ser opacos */
+}
