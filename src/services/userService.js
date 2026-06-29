@@ -18,4 +18,20 @@ const loginUser =async(user)=>{
     }
 }
 
-export default {registerUser,loginUser}
+const profileUser = async () => {
+    try {
+        return await axios.get(`/profile`)
+    } catch (error) {
+        throw error;
+    }
+}
+
+const logoutUser = async () => {
+    try {
+        return await axios.post(`/logout`)
+    } catch (error) {
+        throw error;
+    }
+}
+
+export default {registerUser,loginUser,profileUser,logoutUser}

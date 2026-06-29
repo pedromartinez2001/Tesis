@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useEffect } from "react";
 import userService from "../services/userService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
@@ -15,7 +15,7 @@ const LoginForm = () => {
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) {
-      navigate("/view");
+      navigate("/ingresos-gastos");
     }
   }, [navigate]);
   const {
@@ -27,15 +27,14 @@ const LoginForm = () => {
   const onSubmit = async (data) => {
     try {
       const user = await userService.loginUser(data);
-      if (user) {
-        console.log("logeado");
+      if (user && user.data) {
         localStorage.setItem("user", JSON.stringify(user.data));
-        navigate("/view");
+        navigate("/ingresos-gastos");
       }
     } catch (error) {
       console.error("Error en login:", error);
       setErrorMessage(
-        error.response?.data?.message || "Error al iniciar sesión"
+        error.response?.data?.message || "Error al iniciar sesión",
       );
     }
   };
@@ -80,6 +79,13 @@ const LoginForm = () => {
           <Button variant="primary" type="submit" className="w-100">
             Iniciar sesión
           </Button>
+
+          <div className="text-center mt-3">
+            <span style={{ color: "#64748B" }}>¿No tienes cuenta? </span>
+            <Link to="/register" style={{ fontWeight: 600 }}>
+              Regístrate
+            </Link>
+          </div>
         </Form>
       </Card>
     </Container>

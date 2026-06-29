@@ -3,17 +3,34 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import dayjs from "dayjs";
 
-const ModalForm = ({ options, onSubmit, title, fecha }) => {
+const ModalForm = ({
+  options,
+  onSubmit,
+  title,
+  fecha,
+  useRadioOptions = false,
+  showDescription = false,
+  categoryLabel = "Selecciona una opción",
+}) => {
   const [show, setShow] = useState(false);
-  const { register, handleSubmit, reset } = useForm({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       date: dayjs().format("YYYY-MM-DD"), // Fecha de hoy por defecto
+      category: "",
     },
   });
+  const selectedCategory = watch("category");
   const minDate = dayjs(fecha).startOf("month").format("YYYY-MM-DD"); // Primer día del mes
   const maxDate = dayjs(fecha).endOf("month").format("YYYY-MM-DD"); // Último día del mes
   const handleClose = () => {
-    setShow(false), reset();
+    (setShow(false), reset());
   };
   const handleShow = () => setShow(true);
 
@@ -35,19 +52,87 @@ const ModalForm = ({ options, onSubmit, title, fecha }) => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit(handleFormSubmit)}>
+            {showDescription && (
+              <Form.Group controlId="formDescription">
+                <Form.Label>Descripción</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Ej: Compra en supermercado"
+                  {...register("description", { required: true })}
+                />
+              </Form.Group>
+            )}
+
             <Form.Group controlId="formOption">
-              <Form.Label>Selecciona una opción</Form.Label>
-              <Form.Control
-                as="select"
-                {...register("category", { required: true })}
-              >
-                <option value="">Seleccione...</option>
-                {options.map((opt, index) => (
-                  <option key={index} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </Form.Control>
+              <Form.Label>{categoryLabel}</Form.Label>
+              {useRadioOptions ? (
+                <div>
+                  <input
+                    type="hidden"
+                    {...register("category", { required: true })}
+                  />
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    {options.map((opt, index) => {
+                      const isSelected = selectedCategory === opt.value;
+                      return (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() =>
+                            setValue("category", opt.value, {
+                              shouldValidate: true,
+                            })
+                          }
+                          style={{
+                            border: isSelected
+                              ? "2px solid var(--primary)"
+                              : "1px solid #D0D7DE",
+                            borderRadius: "8px",
+                            background: isSelected
+                              ? "rgba(37, 99, 235, 0.1)"
+                              : "#fff",
+                            color: "var(--text)",
+                            padding: "0.75rem 0.5rem",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {errors.category && (
+                    <div
+                      style={{
+                        color: "#DC2626",
+                        marginTop: "0.5rem",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      Selecciona una categoría.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Form.Control
+                  as="select"
+                  {...register("category", { required: true })}
+                >
+                  <option value="">Seleccione...</option>
+                  {options.map((opt, index) => (
+                    <option key={index} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </Form.Control>
+              )}
             </Form.Group>
 
             <Form.Group controlId="formAmount">

@@ -1,25 +1,13 @@
-import { Container, Row } from "react-bootstrap";
-
 const Footer = () => {
   return (
-    <footer
-      style={{
-        textAlign: "center",
-        position: "relative",
-        width: "100%",
-        bottom: "0",
-        background: "#ADFF2F",
-        color: "white",
-      }}
-    >
-      <Container>
-        <Row>
-          <p>Pedro Martinez-Proyecto de Tesis de grado</p>
-        </Row>
-        <Row>
-          <p>Encarnación - Paraguay - 2024</p>
-        </Row>
-      </Container>
+    <footer className="app-footer" role="contentinfo">
+      <div className="app-footer-inner">
+        <p className="app-footer-text">
+          Pedro Martinez - Proyecto de Tesis de Grado
+          <br />
+          Encarnación - Paraguay - 2026
+        </p>
+      </div>
     </footer>
   );
 };
