@@ -22,7 +22,7 @@ const LoadingSpinner = () => (
     <p>Cargando...</p>
   </div>
 );
-
+console.log("API URL:", import.meta.env.VITE_API_URL);
 const App = () => {
   return (
     <Container fluid className="app-shell">
